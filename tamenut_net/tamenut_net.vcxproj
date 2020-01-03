@@ -173,6 +173,8 @@
     <ClInclude Include="..\include\MfLog\LogCommon.h" />
     <ClInclude Include="..\include\MfLog\LogDllDefine.h" />
     <ClInclude Include="..\include\MfLog\LogModule.h" />
+    <ClInclude Include="ClientSocket.h" />
+    <ClInclude Include="ServerSocket.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TameClient.h" />
     <ClInclude Include="TameClientImpl.h" />
@@ -183,6 +185,7 @@
     <ClInclude Include="TNetData.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ClientSocket.cpp" />
     <ClCompile Include="dllmain.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -197,6 +200,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="ServerSocket.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

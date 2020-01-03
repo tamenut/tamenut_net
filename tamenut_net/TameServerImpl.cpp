@@ -23,3 +23,4 @@ void TameServerImpl::on_message(ClientId netId, const TNetData& Packet)
 {
 	INFO_LOG("- message\n");
 }
+
