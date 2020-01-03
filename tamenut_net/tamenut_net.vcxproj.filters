@@ -1,0 +1,153 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="소스 파일">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="헤더 파일">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="리소스 파일">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{477d6f7a-d712-41ed-8225-33b97b7966e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ext_include">
+      <UniqueIdentifier>{22a47322-e970-40a3-b517-73c3d2e70c23}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="TameServer.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="TameClient.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="TameClientImpl.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="TameServerImpl.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="common_def.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\MfLog\LogCommon.h">
+      <Filter>ext_include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\MfLog\LogDllDefine.h">
+      <Filter>ext_include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\MfLog\LogModule.h">
+      <Filter>ext_include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\CommonUtil\CommonDllDefine.h">
+      <Filter>ext_include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\CommonUtil\define_dll.h">
+      <Filter>ext_include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\CommonUtil\HighResolutionTime.h">
+      <Filter>ext_include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\CommonUtil\PrivateProfileManager.h">
+      <Filter>ext_include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\CommonUtil\SerializedPayload.h">
+      <Filter>ext_include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\CommonUtil\SharedMemory.h">
+      <Filter>ext_include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\CommonUtil\StringQueue.h">
+      <Filter>ext_include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\CommonUtil\TCircularQueue.h">
+      <Filter>ext_include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\CommonUtil\TCond.h">
+      <Filter>ext_include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\CommonUtil\TCondition.h">
+      <Filter>ext_include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\CommonUtil\TList.h">
+      <Filter>ext_include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\CommonUtil\TMemoryManager.h">
+      <Filter>ext_include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\CommonUtil\TMsgQueue.h">
+      <Filter>ext_include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\CommonUtil\TMutex.h">
+      <Filter>ext_include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\CommonUtil\TNamedMutex.h">
+      <Filter>ext_include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\CommonUtil\TSerialSocket.h">
+      <Filter>ext_include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\CommonUtil\TSocket.h">
+      <Filter>ext_include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\CommonUtil\TStringCircularQueue.h">
+      <Filter>ext_include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\CommonUtil\TTcpSocket.h">
+      <Filter>ext_include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\CommonUtil\TThread.h">
+      <Filter>ext_include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\CommonUtil\TUdpSocket.h">
+      <Filter>ext_include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\CommonUtil\TUtil.h">
+      <Filter>ext_include</Filter>
+    </ClInclude>
+    <ClInclude Include="TNetData.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="tamenut_net.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="TameServer.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="TameClient.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="TameClientImpl.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="TameServerImpl.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="TNetData.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
