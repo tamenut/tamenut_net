@@ -7,6 +7,7 @@ namespace TAMENUT {
 TameServerImpl::TameServerImpl(unsigned short bind_port)
 {
 	_sock = new ServerSocket(bind_port);
+	_sock->set_listener(this);
 }
 
 TameServerImpl::~TameServerImpl()

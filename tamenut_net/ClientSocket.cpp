@@ -4,6 +4,7 @@
 #include "HighResolutionTime.h"
 #include <string.h>
 #include <list>
+#include "SocketDef.h"
 
 #ifdef _LINUX_
 #include <sys/types.h>
@@ -12,15 +13,21 @@
 #endif
 
 using namespace std;
-//#define FD_SETSIZE 128
-//XXX
-#define MAX_SOCK_NUM 64	// FD_SETSIZE 64
-//#define MAX_SOCK_NUM 4	// FD_SETSIZE 64
+
 
 namespace TAMENUT {
 ClientSocket::ClientSocket(const char *dst_ip_str, unsigned short bind_port)
 	:_user_data_queue(1024 * 1024 * 5)
 {
+#if defined(WIN32)
+	static bool is_process = false;
+	if (is_process == false)
+	{
+		WSADATA wsaData;
+		WSAStartup(MAKEWORD(2, 2), &wsaData);
+		is_process = true;
+	}
+#endif
 	init(inet_addr(dst_ip_str), bind_port);
 }
 

@@ -51,7 +51,9 @@ public:
 	unsigned int get_current_rcv_buf_size();
 	unsigned int get_current_rcv_buf_msg_cnt();
 	void set_listener(TameServerImpl *listener);
-	unsigned int get_client_id();
+	unsigned int pop_client_id();
+	void push_client_id(unsigned int cid);
+
 protected:
 
 	void run();
@@ -68,7 +70,7 @@ private:
 	unsigned int _pkt_size_start_offset;
 	unsigned int _pkt_size_length;
 	unsigned int _max_client_cnt;
-	unsigned int _next_client_id;
+	
 	TameServerImpl *_server_listener;
 
 	TStringCircularQueue _user_data_queue;
@@ -77,6 +79,7 @@ private:
 
 	bool _recv_blocking;
 	list<ClientSock> _client_sock_list;
+	list<unsigned int> _client_id_list;
 };
 }
 

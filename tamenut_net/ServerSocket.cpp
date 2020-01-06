@@ -5,6 +5,7 @@
 #include "TameServerImpl.h"
 #include <string.h>
 #include <list>
+#include "SocketDef.h"
 
 #ifdef _LINUX_
 #include <sys/types.h>
@@ -21,6 +22,18 @@ ServerSocket::ServerSocket(unsigned short bind_port)
 	:_user_data_queue(1024 * 1024 * 5)
 	, _max_client_cnt(MAX_SOCK_NUM)
 {
+#if defined(WIN32)
+	static bool is_process = false;
+	if (is_process == false)
+	{
+		WSADATA wsaData;
+		WSAStartup(MAKEWORD(2, 2), &wsaData);
+		is_process = true;
+	}
+#endif
+	for (unsigned int i = 0; i < _max_client_cnt; i++) {
+		_client_id_list.push_back(i+1);
+	}
 	init(bind_port);
 }
 
@@ -159,7 +172,7 @@ void ServerSocket::run()
 				ClientSock client_sock;
 				client_sock._sock = sock;
 				client_sock._addr = client_addr;
-				client_sock._client_id = get_client_id();
+				client_sock._client_id = pop_client_id();
 				_client_sock_list.push_back(client_sock);
 				FD_SET(sock, &read_socks);
 				if (sock > max_sock)
@@ -177,7 +190,7 @@ void ServerSocket::run()
 		//for(unsigned int i=0; i<MAX_SOCK_NUM; i++)
 		for (iter = _client_sock_list.begin(); iter != _client_sock_list.end(); )
 		{
-			int read_ret = 0;
+			int read_ret = 1;
 			ClientSock client_sock = *iter;
 			if (client_sock._sock != SOCKET_ERROR && FD_ISSET(client_sock._sock, &all_socks))
 			{
@@ -193,6 +206,7 @@ void ServerSocket::run()
 				FD_CLR(client_sock._sock, &read_socks);
 				closesocket(client_sock._sock);
 				iter = _client_sock_list.erase(iter);
+				push_client_id(client_sock._client_id);
 			}
 			else if (read_ret == 0)
 			{
@@ -200,6 +214,7 @@ void ServerSocket::run()
 				FD_CLR(client_sock._sock, &read_socks);
 				closesocket(client_sock._sock);
 				iter = _client_sock_list.erase(iter);
+				push_client_id(client_sock._client_id);
 			}
 			else //if(read_ret > 0)
 			{
@@ -431,9 +446,16 @@ void ServerSocket::set_listener(TameServerImpl * listener)
 	_server_listener = listener;
 }
 
-unsigned int ServerSocket::get_client_id()
+unsigned int ServerSocket::pop_client_id()
 {
-	return _next_client_id++;
+	unsigned int cid = _client_id_list.front();
+	_client_id_list.pop_front();
+	return cid;
+}
+
+void ServerSocket::push_client_id(unsigned int cid)
+{
+	_client_id_list.push_back(cid);
 }
 
 }
