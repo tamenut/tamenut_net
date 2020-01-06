@@ -11,33 +11,17 @@
 #include <netinet/tcp.h>
 #endif
 
-ClientSocket::ClientSocket()
-{
-}
-
-
-ClientSocket::~ClientSocket()
-{
-}
-
-
 using namespace std;
 //#define FD_SETSIZE 128
 //XXX
 #define MAX_SOCK_NUM 64	// FD_SETSIZE 64
 //#define MAX_SOCK_NUM 4	// FD_SETSIZE 64
 
-
-ClientSocket::ClientSocket()
+namespace TAMENUT {
+ClientSocket::ClientSocket(const char *dst_ip_str, unsigned short bind_port)
 	:_user_data_queue(1024 * 1024 * 5)
 {
-
-}
-
-//송신용 socket (client)
-ClientSocket::ClientSocket(const char *dst_ip_str, unsigned short bind_port)
-{
-	sender_init(inet_addr(dst_ip_str), bind_port);
+	init(inet_addr(dst_ip_str), bind_port);
 }
 
 ClientSocket::~ClientSocket()
@@ -45,35 +29,34 @@ ClientSocket::~ClientSocket()
 	//패킷 수신을 위해 소켓을 오픈하고 있으므로 쓰레드 종료가 소켓종료보다 먼저 실행되어야함
 	//stop();
 #ifdef WIN32
-	if (_snd_sock != NULL)
+	if (_sock != NULL)
 	{
-		closesocket(_snd_sock);
+		closesocket(_sock);
 	}
 #else
-	if (_snd_sock != 0)
+	if (_sock != 0)
 	{
-		shutdown(_snd_sock, SHUT_RDWR);
-		close(_snd_sock);
+		shutdown(_sock, SHUT_RDWR);
+		close(_sock);
 	}
 #endif
 }
 
-void ClientSocket::sender_init(int dst_ip_addr, unsigned short bind_port)
+void ClientSocket::init(int dst_ip_addr, unsigned short bind_port)
 {
-	_socket_type = SEND_SOCKET_TYPE;
-	_is_network_byte_ordering = true;
-
 	_connection_flag = false;
 	_recv_blocking = false;
-	_rcv_sock = NULL;
+	_sock = NULL;
 
-	if ((_snd_sock = socket(AF_INET, SOCK_STREAM, 0)) == SOCKET_ERROR)
+	if ((_sock = socket(AF_INET, SOCK_STREAM, 0)) == SOCKET_ERROR)
 	{
 		printf("Error : TCP socket error (addr:%x, port:%u)\n", dst_ip_addr, bind_port);
 	}
 
 	int snd_buf_size = SEND_SOCK_BUF_SIZE;
-	setsockopt(_snd_sock, SOL_SOCKET, SO_SNDBUF, (char*)&snd_buf_size, sizeof(snd_buf_size));
+	int rcv_buf_size = RECV_SOCK_BUF_SIZE;
+	setsockopt(_sock, SOL_SOCKET, SO_SNDBUF, (char*)&snd_buf_size, sizeof(snd_buf_size));
+	setsockopt(_sock, SOL_SOCKET, SO_RCVBUF, (char*)&rcv_buf_size, sizeof(rcv_buf_size));
 
 	//Creation of the socket
 	memset(&_servaddr, 0, sizeof(_servaddr));
@@ -88,7 +71,7 @@ void ClientSocket::sender_init(int dst_ip_addr, unsigned short bind_port)
 	}
 
 	int opt_val = 1;
-	setsockopt(_snd_sock, IPPROTO_TCP, TCP_NODELAY, (char*)&opt_val, sizeof(opt_val));
+	setsockopt(_sock, IPPROTO_TCP, TCP_NODELAY, (char*)&opt_val, sizeof(opt_val));
 
 }
 
@@ -96,7 +79,7 @@ bool ClientSocket::connection()
 {
 	if (_connection_flag == false)
 	{
-		if (connect(_snd_sock, (struct sockaddr *) &_servaddr, sizeof(_servaddr))<0)
+		if (connect(_sock, (struct sockaddr *) &_servaddr, sizeof(_servaddr))<0)
 		{
 			_connection_flag = false;
 			//printf("Error : connection fail!!\n");
@@ -117,27 +100,26 @@ void ClientSocket::run()
 	int rcv_len;
 	while (is_runnable() == true)
 	{
-		rcv_len = read_pkt(_rcv_sock, payload, sizeof(payload));
-		push_pkt_queue(payload, rcv_len);
+		rcv_len = read_pkt(_sock, payload, sizeof(payload));
+		if (rcv_len > 0) {
+			push_pkt_queue(payload, rcv_len);
+		}
 	}
 }
 
-int ClientSocket::read_pkt(SOCKET client_sock, char *payload, unsigned int payload_len)
+int ClientSocket::read_pkt(SOCKET serv_sock, char *payload, unsigned int payload_len)
 {
 	int pkt_len = 0;
-	char pkt_len_payload[MAX_PAYLOAD_SIZE];
 	unsigned int total_pkt_len = 0;
-	unsigned int hdr_length = 4;
 	//패킷길이 4byte만큼 읽기
 
-	pkt_len = recv(client_sock, (char*)&total_pkt_len, sizeof(int), MSG_WAITALL);
+	pkt_len = recv(serv_sock, (char*)&total_pkt_len, sizeof(int), MSG_WAITALL);
 	if (total_pkt_len > payload_len)
 		pkt_len = -1;
 
-	if (pkt_len > 0)
-	{
+	if (pkt_len > 0){
 		total_pkt_len = ntoh_t(total_pkt_len);
-		pkt_len = recv(client_sock, payload, total_pkt_len, MSG_WAITALL);
+		pkt_len = recv(serv_sock, payload, total_pkt_len, MSG_WAITALL);
 	}
 
 	return pkt_len;
@@ -146,17 +128,12 @@ int ClientSocket::read_pkt(SOCKET client_sock, char *payload, unsigned int paylo
 int ClientSocket::read(char *payload, unsigned int payload_len)
 {
 	int len = -1;
-	if (_socket_type == RECEIVE_SOCKET_TYPE)
-	{
-		do {
-			//pop_user_data_queue() 호출시 값이 없을수도 있으므로 반복 수행
-			len = pop_user_data_queue(payload, payload_len);
-		} while (len == 0);
-	}
-	else
-	{
-		printf("Error : TcpSocket's type is SendSocket!!\n");
-	}
+
+	do {
+		//pop_user_data_queue() 호출시 값이 없을수도 있으므로 반복 수행
+		len = pop_user_data_queue(payload, payload_len);
+	} while (len == 0);
+
 	return len;
 }
 
@@ -226,34 +203,34 @@ int ClientSocket::pop_user_data_queue(char *payload, unsigned int payload_len)
 	return rcv_payload_len;
 }
 
+int ClientSocket::post(SerializedPayload &serialized_payload)
+{
+	return post(serialized_payload.get_payload_ptr(), serialized_payload.get_payload_len());
+}
+
 //tcp 소켓으로 전송하는 함수
 int ClientSocket::post(char *payload, unsigned int payload_len)
 {
 	int sent_len = -1;
-	if (_socket_type == SEND_SOCKET_TYPE)
-	{
-		if (connection() == true)
-		{
-			payload_len = hton_t(payload_len);
-			if ((sent_len = _post((char*)&payload_len, sizeof(payload_len))) == -1)
-			{
-			}
 
-			if ((sent_len = _post(payload, payload_len)) == -1)
+	if (connection() == true)
+	{
+		payload_len = hton_t(payload_len);
+		if ((sent_len = _post((char*)&payload_len, sizeof(payload_len))) == -1)
+		{
+		}
+
+		if ((sent_len = _post(payload, payload_len)) == -1)
+		{
+			if (err_num == 10053 || err_num == 104)
 			{
-				if (err_num == 10053 || err_num == 104)
-				{
-					printf("Error :TCP Socket Post (err:%s)!\n", strerror(err_num));
-					_connection_flag = false;
-					sent_len = -2;
-				}
+				printf("Error :TCP Socket Post (err:%s)!\n", strerror(err_num));
+				_connection_flag = false;
+				sent_len = -2;
 			}
 		}
 	}
-	else
-	{
-		printf("Error : TcpSocket's type is ReceiveSocket!!\n");
-	}
+
 
 	return sent_len;
 }
@@ -265,7 +242,7 @@ int ClientSocket::_post(char *payload, int payload_len)
 
 	while (sent_len < payload_len)
 	{
-		sent_result = send(_snd_sock, payload + sent_len, payload_len - sent_len, 0);
+		sent_result = send(_sock, payload + sent_len, payload_len - sent_len, 0);
 
 		if (sent_result == -1)
 		{
@@ -288,10 +265,10 @@ void ClientSocket::set_recv_blocking(bool recv_blocking)
 void ClientSocket::set_snd_time_out(int milisec_time_out)
 {
 #ifdef WIN32
-	if (_snd_sock != NULL)
+	if (_sock != NULL)
 	{
 		int opt_len = sizeof(milisec_time_out);
-		int res = setsockopt(_snd_sock, SOL_SOCKET, SO_SNDTIMEO, (char*)&milisec_time_out, opt_len);
+		int res = setsockopt(_sock, SOL_SOCKET, SO_SNDTIMEO, (char*)&milisec_time_out, opt_len);
 	}
 #else
 	if (_snd_sock != 0)
@@ -308,11 +285,11 @@ void ClientSocket::set_snd_time_out(int milisec_time_out)
 
 void ClientSocket::set_rcv_time_out(int milisec_time_out)
 {
-	if (_rcv_sock)
+	if (_sock)
 	{
 #ifdef WIN32
 		int opt_len = sizeof(milisec_time_out);
-		int res = setsockopt(_rcv_sock, SOL_SOCKET, SO_RCVTIMEO, (char*)&milisec_time_out, opt_len);
+		int res = setsockopt(_sock, SOL_SOCKET, SO_RCVTIMEO, (char*)&milisec_time_out, opt_len);
 #else
 		struct timeval opt_val;
 		opt_val.tv_sec = milisec_time_out / 1000;
@@ -335,12 +312,12 @@ bool ClientSocket::is_connection()
 
 void ClientSocket::set_linger()
 {
-	if (_rcv_sock != NULL)
+	if (_sock != NULL)
 	{
 		struct linger optval;
 		optval.l_onoff = 1;
 		optval.l_linger = 0;
-		setsockopt(_rcv_sock, SOL_SOCKET, SO_LINGER, (char*)&optval, sizeof(optval));
+		setsockopt(_sock, SOL_SOCKET, SO_LINGER, (char*)&optval, sizeof(optval));
 	}
 }
 
@@ -352,4 +329,5 @@ unsigned int ClientSocket::get_current_rcv_buf_size()
 unsigned int ClientSocket::get_current_rcv_buf_msg_cnt()
 {
 	return _user_data_queue.get_string_cnt();
+}
 }

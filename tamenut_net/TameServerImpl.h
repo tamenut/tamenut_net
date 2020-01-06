@@ -2,6 +2,7 @@
 #include "common_def.h"
 #include "TNetData.h"
 
+namespace TAMENUT {
 class TameServerImpl
 {
 public:
@@ -11,4 +12,4 @@ public:
 	void on_disconnect(ClientId netId, const TCHAR * pReason);
 	void on_message(ClientId netId, const TNetData & Packet);
 };
-
+}

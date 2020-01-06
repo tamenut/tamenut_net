@@ -1,4 +1,7 @@
 #pragma once
+
+namespace TAMENUT {
+
 class TameClientImpl
 {
 public:
@@ -6,3 +9,4 @@ public:
 	~TameClientImpl();
 };
 
+}

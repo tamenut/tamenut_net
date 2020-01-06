@@ -1,5 +1,7 @@
 #pragma once
-class TameServer
+#include "TameServerImpl.h"
+
+class TameServer : public TAMENUT::TameServerImpl
 {
 public:
 	TameServer();

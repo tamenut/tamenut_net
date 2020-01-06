@@ -19,7 +19,7 @@
 #endif
 
 #define SEND_SOCK_BUF_SIZE 1*1024*1024
-#define RECEIVE_SOCK_BUF_SIZE 1*1024*1024
+#define RECV_SOCK_BUF_SIZE 1*1024*1024
 
 struct QueueNode
 {

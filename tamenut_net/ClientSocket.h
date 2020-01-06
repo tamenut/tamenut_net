@@ -23,14 +23,12 @@ struct ClientSock
 	SOCKET sock;
 	struct sockaddr_in addr;
 };
-
-class ClientSocket : public TThread, public TSocket
+namespace TAMENUT {
+class ClientSocket : public TThread
 {
 public:
-	ClientSocket();
 	//Sender Constructor
 	ClientSocket(const char *dst_ip_str, unsigned short bind_port);
-
 
 	virtual ~ClientSocket(void);
 
@@ -44,14 +42,14 @@ public:
 	void set_rcv_time_out(int milisec_time_out);
 	bool is_connection();
 
-	void sender_init(int dst_ip_addr, unsigned short bind_port);
+	void init(int dst_ip_addr, unsigned short bind_port);
 
 	unsigned int get_current_rcv_buf_size();
 	unsigned int get_current_rcv_buf_msg_cnt();
 protected:
 
 	void run();
-	int read_pkt(SOCKET client_sock, char * payload, unsigned int payload_len);
+	int read_pkt(SOCKET serv_sock, char * payload, unsigned int payload_len);
 	bool connection();
 	void push_pkt_queue(char *payload, int payload_len);
 	int pop_user_data_queue(char *payload, unsigned int payload_len);
@@ -59,19 +57,17 @@ protected:
 	void set_linger();
 
 private:
-	SOCKET _snd_sock;
-	struct sockaddr_in _servaddr;
+	SOCKET _sock;
 	bool _connection_flag;
 	unsigned short _bind_port;
-
+	struct sockaddr_in _servaddr;
 
 	TStringCircularQueue _user_data_queue;
 	TMutex _queue_lock;
 	TCondition _queue_cond;
 
 	bool _recv_blocking;
-	bool _is_network_byte_ordering;
 	list<ClientSock> _client_sock_list;
 };
-
+}
 

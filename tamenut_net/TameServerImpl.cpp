@@ -2,6 +2,7 @@
 #include "TameServerImpl.h"
 #include "LogModule.h"
 
+namespace TAMENUT {
 TameServerImpl::TameServerImpl()
 {
 }
@@ -23,4 +24,4 @@ void TameServerImpl::on_message(ClientId netId, const TNetData& Packet)
 {
 	INFO_LOG("- message\n");
 }
-
+}

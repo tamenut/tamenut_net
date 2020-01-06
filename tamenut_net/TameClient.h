@@ -1,5 +1,7 @@
 #pragma once
-class TameClient
+#include "TameClientImpl.h"
+
+class TameClient : public TAMENUT::TameClientImpl
 {
 public:
 	TameClient();
