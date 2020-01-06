@@ -2,7 +2,8 @@
 #include "TameServer.h"
 
 
-TameServer::TameServer()
+TameServer::TameServer(unsigned short bind_port)
+	:TameServerImpl(bind_port)
 {
 }
 

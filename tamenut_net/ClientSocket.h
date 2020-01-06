@@ -18,11 +18,8 @@
 
 using namespace std;
 
-struct ClientSock
-{
-	SOCKET sock;
-	struct sockaddr_in addr;
-};
+class TameClientImpl;
+
 namespace TAMENUT {
 class ClientSocket : public TThread
 {
@@ -46,6 +43,8 @@ public:
 
 	unsigned int get_current_rcv_buf_size();
 	unsigned int get_current_rcv_buf_msg_cnt();
+	void set_listener(TameClientImpl *listener);
+
 protected:
 
 	void run();
@@ -61,13 +60,13 @@ private:
 	bool _connection_flag;
 	unsigned short _bind_port;
 	struct sockaddr_in _servaddr;
+	TameClientImpl *_client_listener;
 
 	TStringCircularQueue _user_data_queue;
 	TMutex _queue_lock;
 	TCondition _queue_cond;
 
 	bool _recv_blocking;
-	list<ClientSock> _client_sock_list;
 };
 }
 

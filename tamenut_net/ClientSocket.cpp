@@ -330,4 +330,8 @@ unsigned int ClientSocket::get_current_rcv_buf_msg_cnt()
 {
 	return _user_data_queue.get_string_cnt();
 }
+void ClientSocket::set_listener(TameClientImpl * listener)
+{
+	_client_listener = listener;
+}
 }

@@ -2,6 +2,7 @@
 #include "ServerSocket.h"
 #include "TUtil.h"
 #include "HighResolutionTime.h"
+#include "TameServerImpl.h"
 #include <string.h>
 #include <list>
 
@@ -12,15 +13,13 @@
 #endif
 
 using namespace std;
-//#define FD_SETSIZE 128
-//XXX
-#define MAX_SOCK_NUM 64	// FD_SETSIZE 64
-//#define MAX_SOCK_NUM 4	// FD_SETSIZE 64
+
+#define MAX_SOCK_NUM 1024
 
 namespace TAMENUT {
 ServerSocket::ServerSocket(unsigned short bind_port)
 	:_user_data_queue(1024 * 1024 * 5)
-	, _max_client_cnt(1024)
+	, _max_client_cnt(MAX_SOCK_NUM)
 {
 	init(bind_port);
 }
@@ -48,7 +47,7 @@ void ServerSocket::init(unsigned short bind_port)
 {
 	bool res_bind = true;
 	bool res_listend = true;
-
+	_server_listener = NULL;
 	_pkt_size_start_offset = 0;
 	_pkt_size_length = 4;
 
@@ -61,22 +60,22 @@ void ServerSocket::init(unsigned short bind_port)
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	servaddr.sin_port = htons(bind_port);
-
+	/*
 	int snd_buf_size = SEND_SOCK_BUF_SIZE;
 	int rcv_buf_size = RECV_SOCK_BUF_SIZE;
 	setsockopt(_sock, SOL_SOCKET, SO_SNDBUF, (char*)&snd_buf_size, sizeof(snd_buf_size));
 	setsockopt(_sock, SOL_SOCKET, SO_RCVBUF, (char*)&rcv_buf_size, sizeof(rcv_buf_size));
-
+	*/
 
 	if (bind(_sock, (struct sockaddr *) &servaddr, sizeof(servaddr)) == SOCKET_ERROR)
 	{
-		printf("Error : TCP bind error (port:%u)\n", bind_port);
+		printf("Error : TCP bind error (port:%u, err:%s)\n", bind_port, strerror(err_num));
 		res_bind = false;
 	}
 
 	if (listen(_sock, _max_client_cnt) == SOCKET_ERROR)
 	{
-		printf("Error : TCP listen error (port:%u)\n", bind_port);
+		printf("Error : TCP listen error (port:%u, err:%s)\n", bind_port, strerror(err_num));
 		res_listend = false;
 	}
 	_bind_port = bind_port;
@@ -91,6 +90,12 @@ void ServerSocket::init(unsigned short bind_port)
 
 	set_linger();
 }
+
+unsigned short ServerSocket::get_bind_port()
+{
+	return _bind_port;
+}
+
 void ServerSocket::set_pkt_len_offset(unsigned short pkt_size_start_offset, unsigned short pkt_size_length)
 {
 	_pkt_size_start_offset = pkt_size_start_offset;
@@ -152,15 +157,18 @@ void ServerSocket::run()
 			else
 			{
 				ClientSock client_sock;
-				client_sock.sock = sock;
-				client_sock.addr = client_addr;
+				client_sock._sock = sock;
+				client_sock._addr = client_addr;
+				client_sock._client_id = get_client_id();
 				_client_sock_list.push_back(client_sock);
 				FD_SET(sock, &read_socks);
 				if (sock > max_sock)
 					max_sock = sock;
-
 				printf("TCP Accept ====(socket cnt:%d), addr:%s, port:%u \n",
-					_client_sock_list.size(), inet_ntoa(client_addr.sin_addr), ntohs(client_sock.addr.sin_port));
+					_client_sock_list.size(), inet_ntoa(client_addr.sin_addr), ntohs(client_sock._addr.sin_port));
+				if (_server_listener) {
+					_server_listener->on_connect(client_sock._client_id);
+				}
 			}
 		}
 
@@ -171,9 +179,9 @@ void ServerSocket::run()
 		{
 			int read_ret = 0;
 			ClientSock client_sock = *iter;
-			if (client_sock.sock != SOCKET_ERROR && FD_ISSET(client_sock.sock, &all_socks))
+			if (client_sock._sock != SOCKET_ERROR && FD_ISSET(client_sock._sock, &all_socks))
 			{
-				read_ret = read_pkt(client_sock.sock, payload, sizeof(payload));
+				read_ret = read_pkt(client_sock._sock, payload, sizeof(payload));
 				if (read_ret > 0) {
 					push_pkt_queue(payload, read_ret);
 				}
@@ -182,15 +190,15 @@ void ServerSocket::run()
 			if (read_ret == SOCKET_ERROR)
 			{
 				printf("Error : TcpSocket rcv_return is -1 (err:%s, %d)\n", strerror(err_num), err_num);
-				FD_CLR(client_sock.sock, &read_socks);
-				closesocket(client_sock.sock);
+				FD_CLR(client_sock._sock, &read_socks);
+				closesocket(client_sock._sock);
 				iter = _client_sock_list.erase(iter);
 			}
 			else if (read_ret == 0)
 			{
 				printf("Error : TcpSocket rcv_return is 0 (err:%s, %d)\n", strerror(err_num), err_num);
-				FD_CLR(client_sock.sock, &read_socks);
-				closesocket(client_sock.sock);
+				FD_CLR(client_sock._sock, &read_socks);
+				closesocket(client_sock._sock);
 				iter = _client_sock_list.erase(iter);
 			}
 			else //if(read_ret > 0)
@@ -417,4 +425,15 @@ unsigned int ServerSocket::get_current_rcv_buf_msg_cnt()
 {
 	return _user_data_queue.get_string_cnt();
 }
+
+void ServerSocket::set_listener(TameServerImpl * listener)
+{
+	_server_listener = listener;
+}
+
+unsigned int ServerSocket::get_client_id()
+{
+	return _next_client_id++;
+}
+
 }

@@ -18,17 +18,19 @@
 
 using namespace std;
 
+
 struct ClientSock
 {
-	SOCKET sock;
-	struct sockaddr_in addr;
+	SOCKET _sock;
+	unsigned int _client_id;
+	struct sockaddr_in _addr;
 };
+
 namespace TAMENUT {
+class TameServerImpl;
 class ServerSocket : public TThread
 {
 public:
-	ServerSocket();
-	//Receiver Constructor
 	ServerSocket(unsigned short bind_port);
 	virtual ~ServerSocket(void);
 
@@ -42,17 +44,17 @@ public:
 	void set_snd_time_out(int milisec_time_out);
 	void set_rcv_time_out(int milisec_time_out);
 	bool is_connection();
+	unsigned short get_bind_port();
 	void set_pkt_len_offset(unsigned short pkt_size_start_offset, unsigned short pkt_size_length);
-	void set_pkt_len_offest_byte_ordering(bool network_byte_ordering_flag);
 
 	void init(unsigned short bind_port);
 	unsigned int get_current_rcv_buf_size();
 	unsigned int get_current_rcv_buf_msg_cnt();
+	void set_listener(TameServerImpl *listener);
+	unsigned int get_client_id();
 protected:
 
 	void run();
-	bool connection();
-	int read_and_push_user_data_queue(SOCKET sock);
 	void push_pkt_queue(char *payload, int payload_len);
 	int pop_user_data_queue(char *payload, unsigned int payload_len);
 	int _post(char *payload, int payload_len);
@@ -66,7 +68,8 @@ private:
 	unsigned int _pkt_size_start_offset;
 	unsigned int _pkt_size_length;
 	unsigned int _max_client_cnt;
-
+	unsigned int _next_client_id;
+	TameServerImpl *_server_listener;
 
 	TStringCircularQueue _user_data_queue;
 	TMutex _queue_lock;

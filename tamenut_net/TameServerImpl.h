@@ -1,15 +1,20 @@
 #pragma once
+//#include "ServerSocket.h"
 #include "common_def.h"
 #include "TNetData.h"
 
 namespace TAMENUT {
+class ServerSocket;
 class TameServerImpl
 {
+private:
+	ServerSocket *_sock;
+
 public:
-	TameServerImpl();
+	TameServerImpl(unsigned short bind_port);
 	~TameServerImpl();
-	void on_connect(ClientId netId);
-	void on_disconnect(ClientId netId, const TCHAR * pReason);
-	void on_message(ClientId netId, const TNetData & Packet);
+	void on_connect(unsigned int cid);
+	void on_disconnect(unsigned int cid, const TCHAR * pReason);
+	void on_message(unsigned int cid, const TNetData & Packet);
 };
 }

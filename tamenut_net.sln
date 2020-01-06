@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tamenut_net", "tamenut_net\tamenut_net.vcxproj", "{61A01B1F-B838-4A66-9AFC-C9B13A86A7AC}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "net_example", "net_example\net_example.vcxproj", "{F0EF45E3-A385-451B-859B-B725C00D0E1B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{61A01B1F-B838-4A66-9AFC-C9B13A86A7AC} = {61A01B1F-B838-4A66-9AFC-C9B13A86A7AC}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
