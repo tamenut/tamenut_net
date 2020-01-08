@@ -16,6 +16,7 @@ int main()
 	TameClient client("127.0.0.1", 4567);
 	while (true) {
 		std::cin >> inp;
+		//client->
 	}
     return 0;
 }

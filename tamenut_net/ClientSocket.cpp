@@ -2,6 +2,7 @@
 #include "ClientSocket.h"
 #include "TUtil.h"
 #include "HighResolutionTime.h"
+#include "TameClientImpl.h"
 #include <string.h>
 #include <list>
 #include "SocketDef.h"
@@ -16,8 +17,9 @@ using namespace std;
 
 
 namespace TAMENUT {
-ClientSocket::ClientSocket(const char *dst_ip_str, unsigned short bind_port)
+ClientSocket::ClientSocket(const char *dst_ip_str, unsigned short bind_port, TameClientImpl * listener)
 	:_user_data_queue(1024 * 1024 * 5)
+	, _client_listener(listener)
 {
 #if defined(WIN32)
 	static bool is_process = false;
@@ -68,7 +70,6 @@ void ClientSocket::init(int dst_ip_addr, unsigned short bind_port)
 	//Creation of the socket
 	memset(&_servaddr, 0, sizeof(_servaddr));
 	_servaddr.sin_family = AF_INET;
-
 	_servaddr.sin_addr.s_addr = dst_ip_addr;
 	_servaddr.sin_port = htons(bind_port);
 
@@ -89,12 +90,13 @@ bool ClientSocket::connection()
 		if (connect(_sock, (struct sockaddr *) &_servaddr, sizeof(_servaddr))<0)
 		{
 			_connection_flag = false;
-			//printf("Error : connection fail!!\n");
 		}
 		else
 		{
 			_connection_flag = true;
-			//printf("connection success!!\n");
+			if (_client_listener) {
+				_client_listener->on_connect();
+			}
 		}
 	}
 
@@ -337,8 +339,10 @@ unsigned int ClientSocket::get_current_rcv_buf_msg_cnt()
 {
 	return _user_data_queue.get_string_cnt();
 }
+
 void ClientSocket::set_listener(TameClientImpl * listener)
 {
 	_client_listener = listener;
 }
+
 }

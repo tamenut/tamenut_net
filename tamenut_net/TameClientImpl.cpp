@@ -6,11 +6,31 @@
 namespace TAMENUT {
 TameClientImpl::TameClientImpl(const char *dst_ip_str, unsigned short bind_port)
 {
-	_sock = new ClientSocket(dst_ip_str, bind_port);
+	_sock = new ClientSocket(dst_ip_str, bind_port, this);
 }
 
 
 TameClientImpl::~TameClientImpl()
 {
+}
+
+void TameClientImpl::send(SerializedPkt & pkt)
+{
+//	_sock->post();
+}
+
+void TameClientImpl::on_connect()
+{
+	INFO_LOG("- connect server\n");
+}
+
+void TameClientImpl::on_disconnect(const TCHAR * pReason)
+{
+
+}
+
+void TameClientImpl::on_message(const SerializedPkt & Packet)
+{
+
 }
 }

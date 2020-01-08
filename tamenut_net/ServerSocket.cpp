@@ -18,9 +18,10 @@ using namespace std;
 #define MAX_SOCK_NUM 1024
 
 namespace TAMENUT {
-ServerSocket::ServerSocket(unsigned short bind_port)
+ServerSocket::ServerSocket(unsigned short bind_port, TameServerImpl * listener)
 	:_user_data_queue(1024 * 1024 * 5)
-	, _max_client_cnt(MAX_SOCK_NUM)
+	, _server_listener(listener)
+	, _client_socket_manger(MAX_SOCK_NUM)
 {
 #if defined(WIN32)
 	static bool is_process = false;
@@ -31,9 +32,7 @@ ServerSocket::ServerSocket(unsigned short bind_port)
 		is_process = true;
 	}
 #endif
-	for (unsigned int i = 0; i < _max_client_cnt; i++) {
-		_client_id_list.push_back(i+1);
-	}
+
 	init(bind_port);
 }
 
@@ -60,7 +59,6 @@ void ServerSocket::init(unsigned short bind_port)
 {
 	bool res_bind = true;
 	bool res_listend = true;
-	_server_listener = NULL;
 	_pkt_size_start_offset = 0;
 	_pkt_size_length = 4;
 
@@ -86,7 +84,7 @@ void ServerSocket::init(unsigned short bind_port)
 		res_bind = false;
 	}
 
-	if (listen(_sock, _max_client_cnt) == SOCKET_ERROR)
+	if (listen(_sock, _client_socket_manger.get_max_client_cnt()) == SOCKET_ERROR)
 	{
 		printf("Error : TCP listen error (port:%u, err:%s)\n", bind_port, strerror(err_num));
 		res_listend = false;
@@ -162,66 +160,56 @@ void ServerSocket::run()
 				printf("Error : TCP Receive Socket is Closed\n");
 				break;
 			}
-			else if (_client_sock_list.size() >= MAX_SOCK_NUM)
+			else if (_client_socket_manger.get_current_client_cnt() >= MAX_SOCK_NUM)
 			{
-				printf("Error : TCP Accept is Overflow(connection:%d)\n", _client_sock_list.size());
+				printf("Error : TCP Accept is Overflow(connection:%d)\n", 
+					_client_socket_manger.get_current_client_cnt());
 				closesocket(sock);
 			}
 			else
 			{
-				ClientSock client_sock;
-				client_sock._sock = sock;
-				client_sock._addr = client_addr;
-				client_sock._client_id = pop_client_id();
-				_client_sock_list.push_back(client_sock);
-				FD_SET(sock, &read_socks);
-				if (sock > max_sock)
-					max_sock = sock;
-				printf("TCP Accept ====(socket cnt:%d), addr:%s, port:%u \n",
-					_client_sock_list.size(), inet_ntoa(client_addr.sin_addr), ntohs(client_sock._addr.sin_port));
-				if (_server_listener) {
-					_server_listener->on_connect(client_sock._client_id);
+				unsigned int client_id = _client_socket_manger.add_client_sock(sock, client_addr);
+				if (client_id > 0) {
+					FD_SET(sock, &read_socks);
+
+					if (sock > max_sock)
+						max_sock = sock;
+
+					printf("TCP Accept ====(socket cnt:%d), addr:%s, port:%u \n",
+						_client_socket_manger.get_current_client_cnt(), inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+					if (_server_listener) {
+						_server_listener->on_connect(client_id);
+					}
 				}
 			}
 		}
 
-		list<ClientSock>::iterator iter;
+		int read_ret = 1;
+		ClientSock client_sock = _client_socket_manger.get_client_sock(all_socks);
 
-		//for(unsigned int i=0; i<MAX_SOCK_NUM; i++)
-		for (iter = _client_sock_list.begin(); iter != _client_sock_list.end(); )
+		if (client_sock._sock != SOCKET_ERROR && FD_ISSET(client_sock._sock, &all_socks))
 		{
-			int read_ret = 1;
-			ClientSock client_sock = *iter;
-			if (client_sock._sock != SOCKET_ERROR && FD_ISSET(client_sock._sock, &all_socks))
-			{
-				read_ret = read_pkt(client_sock._sock, payload, sizeof(payload));
-				if (read_ret > 0) {
-					push_pkt_queue(payload, read_ret);
-				}
+			read_ret = read_pkt(client_sock._sock, payload, sizeof(payload));
+			if (read_ret > 0) {
+				push_pkt_queue(payload, read_ret);
 			}
+		}
 
-			if (read_ret == SOCKET_ERROR)
-			{
-				printf("Error : TcpSocket rcv_return is -1 (err:%s, %d)\n", strerror(err_num), err_num);
-				FD_CLR(client_sock._sock, &read_socks);
-				closesocket(client_sock._sock);
-				iter = _client_sock_list.erase(iter);
-				push_client_id(client_sock._client_id);
-			}
-			else if (read_ret == 0)
-			{
-				printf("Error : TcpSocket rcv_return is 0 (err:%s, %d)\n", strerror(err_num), err_num);
-				FD_CLR(client_sock._sock, &read_socks);
-				closesocket(client_sock._sock);
-				iter = _client_sock_list.erase(iter);
-				push_client_id(client_sock._client_id);
-			}
-			else //if(read_ret > 0)
-			{
-				iter++;
-			}
+		if (read_ret == SOCKET_ERROR)
+		{
+			printf("Error : TcpSocket rcv_return is -1 (err:%s, %d)\n", strerror(err_num), err_num);
+			FD_CLR(client_sock._sock, &read_socks);
+			_client_socket_manger.delete_client_sock(client_sock);
+		}
+		else if (read_ret == 0)
+		{
+			printf("Error : TcpSocket rcv_return is 0 (err:%s, %d)\n", strerror(err_num), err_num);
+			FD_CLR(client_sock._sock, &read_socks);
+			
+			_client_socket_manger.delete_client_sock(client_sock);
 		}
 	}
+	
 }
 
 int ServerSocket::read(char *payload, unsigned int payload_len)
@@ -446,16 +434,5 @@ void ServerSocket::set_listener(TameServerImpl * listener)
 	_server_listener = listener;
 }
 
-unsigned int ServerSocket::pop_client_id()
-{
-	unsigned int cid = _client_id_list.front();
-	_client_id_list.pop_front();
-	return cid;
-}
-
-void ServerSocket::push_client_id(unsigned int cid)
-{
-	_client_id_list.push_back(cid);
-}
 
 }

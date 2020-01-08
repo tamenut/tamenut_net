@@ -6,23 +6,27 @@
 namespace TAMENUT {
 TameServerImpl::TameServerImpl(unsigned short bind_port)
 {
-	_sock = new ServerSocket(bind_port);
-	_sock->set_listener(this);
+	_sock = new ServerSocket(bind_port, this);
 }
 
 TameServerImpl::~TameServerImpl()
 {
 }
 
+void TameServerImpl::send(unsigned int cid, SerializedPkt & pkt)
+{
+	//_sock->post(cid, p);
+}
+
 void TameServerImpl::on_connect(unsigned int cid)
 {
-	INFO_LOG("- connect\n");
+	INFO_LOG("- connect client (id:%u) \n", cid);
 }
 void TameServerImpl::on_disconnect(unsigned int cid, const TCHAR* pReason)
 {
 	INFO_LOG("- disconnect\n");
 }
-void TameServerImpl::on_message(unsigned int cid, const TNetData& Packet)
+void TameServerImpl::on_message(unsigned int cid, const SerializedPkt& Packet)
 {
 	INFO_LOG("- message\n");
 }

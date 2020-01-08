@@ -1,4 +1,5 @@
 #pragma once
+#include "SerializedPkt.h"
 
 namespace TAMENUT {
 class ClientSocket;
@@ -10,9 +11,13 @@ public:
 	TameClientImpl(const char *dst_ip_str, unsigned short bind_port);
 	~TameClientImpl();
 
-	/*void on_connect(ClientId netId);
-	void on_disconnect(ClientId netId, const TCHAR * pReason);
-	void on_message(ClientId netId, const TNetData & Packet);*/
+	void send(SerializedPkt & pkt);
+
+	void on_connect();
+	void on_disconnect(const TCHAR * pReason);
+	//void on_message(const SerializedPkt & Packet);
+	void on_message(const SerializedPkt & Packet);
+	
 };
 
 }

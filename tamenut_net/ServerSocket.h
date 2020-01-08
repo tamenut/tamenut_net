@@ -1,16 +1,11 @@
 #pragma once
-
-#if defined(WIN32)
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#pragma comment(lib, "ws2_32")
-#endif
+#include "ClientSocketManager.h"
 #include "TThread.h"
 
 #include "TSocket.h"
 #include <string.h>
 #include "SerializedPayload.h"
-#include <list>
+#include <vector>
 
 #include "TStringCircularQueue.h"
 #include "TMutex.h"
@@ -19,19 +14,31 @@
 using namespace std;
 
 
-struct ClientSock
-{
-	SOCKET _sock;
-	unsigned int _client_id;
-	struct sockaddr_in _addr;
-};
+
 
 namespace TAMENUT {
 class TameServerImpl;
 class ServerSocket : public TThread
 {
+private:
+	SOCKET _sock;
+	struct sockaddr_in _servaddr;
+	bool _connection_flag;
+	unsigned short _bind_port;
+	unsigned int _pkt_size_start_offset;
+	unsigned int _pkt_size_length;
+	
+	TameServerImpl *_server_listener;
+
+	TStringCircularQueue _user_data_queue;
+	TMutex _queue_lock;
+	TCondition _queue_cond;
+
+	bool _recv_blocking;
+	ClientSocketManager _client_socket_manger;
+
 public:
-	ServerSocket(unsigned short bind_port);
+	ServerSocket(unsigned short bind_port, TameServerImpl * listener = NULL);
 	virtual ~ServerSocket(void);
 
 	int read(char *payload, unsigned int payload_len);
@@ -51,8 +58,7 @@ public:
 	unsigned int get_current_rcv_buf_size();
 	unsigned int get_current_rcv_buf_msg_cnt();
 	void set_listener(TameServerImpl *listener);
-	unsigned int pop_client_id();
-	void push_client_id(unsigned int cid);
+		
 
 protected:
 
@@ -61,25 +67,6 @@ protected:
 	int pop_user_data_queue(char *payload, unsigned int payload_len);
 	int _post(char *payload, int payload_len);
 	void set_linger();
-
-private:
-	SOCKET _sock;
-	struct sockaddr_in _servaddr;
-	bool _connection_flag;
-	unsigned short _bind_port;
-	unsigned int _pkt_size_start_offset;
-	unsigned int _pkt_size_length;
-	unsigned int _max_client_cnt;
-	
-	TameServerImpl *_server_listener;
-
-	TStringCircularQueue _user_data_queue;
-	TMutex _queue_lock;
-	TCondition _queue_cond;
-
-	bool _recv_blocking;
-	list<ClientSock> _client_sock_list;
-	list<unsigned int> _client_id_list;
 };
 }
 

@@ -18,14 +18,14 @@
 
 using namespace std;
 
-class TameClientImpl;
 
 namespace TAMENUT {
+class TameClientImpl;
 class ClientSocket : public TThread
 {
 public:
 	//Sender Constructor
-	ClientSocket(const char *dst_ip_str, unsigned short bind_port);
+	ClientSocket(const char *dst_ip_str, unsigned short bind_port, TameClientImpl * listener = NULL);
 
 	virtual ~ClientSocket(void);
 
