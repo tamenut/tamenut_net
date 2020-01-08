@@ -1,5 +1,7 @@
 #pragma once
+#pragma pack(push, 1)
 namespace TAMENUT {
+	
 class SerializedPkt
 {
 private:
@@ -8,5 +10,7 @@ public:
 	SerializedPkt(unsigned int pkt_id);
 	~SerializedPkt();
 };
+
 }
+#pragma pack(pop)
 

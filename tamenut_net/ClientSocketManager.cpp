@@ -43,9 +43,24 @@ unsigned int ClientSocketManager::add_client_sock(ClientSock c_sock)
 			_client_sock_list[i] = c_sock;
 			client_id = i + 1;
 			_current_client_cnt++;
+			break;
+
 		}
 	}
 	return client_id;
+}
+ClientSock ClientSocketManager::get_client_sock(unsigned int client_id)
+{
+	ClientSock res;
+	unsigned int client_idx = client_id - 1;
+
+	if (client_idx >= 0 && client_idx < _client_sock_list.size()) {
+		res = _client_sock_list[client_idx];
+	}
+	else {
+		ERROR_LOG("client_id:%u - (%s)!!\n", __FUNCTION__);
+	}
+	return res;
 }
 
 ClientSock ClientSocketManager::get_client_sock(fd_set sock_fd_set)
@@ -71,7 +86,7 @@ bool ClientSocketManager::delete_client_sock(ClientSock c_sock)
 		res = true;
 	}
 	else {
-		ERROR_LOG("Can't delet client sock(c_sock._client_id:%u )\n", 
+		ERROR_LOG("Can't delet client sock(c_sock._client_id:%u) (%s)\n", 
 			c_sock._client_id, __FUNCTION__);
 		res = false;
 	}

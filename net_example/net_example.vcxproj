@@ -88,12 +88,12 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\include\CommonUtil;..\tamenut_net</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include\CommonUtil;..\include\MfLog;..\include\tamenut_net</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>tamenut_net.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>tamenut_net.lib;MultiFunctionLoggerd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\Debug\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -148,8 +148,11 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Packet.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="UserClient.h" />
+    <ClInclude Include="UserServer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="net_example.cpp" />
@@ -159,6 +162,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="UserClient.cpp" />
+    <ClCompile Include="UserServer.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

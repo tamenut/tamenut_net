@@ -38,6 +38,7 @@ public:
 	unsigned int get_current_client_cnt();
 	unsigned int add_client_sock(SOCKET sock, sockaddr_in addr);
 	ClientSock get_client_sock(fd_set sock_fd_set);
+	ClientSock get_client_sock(unsigned int client_id);
 	bool delete_client_sock(ClientSock c_sock);
 
 private:
