@@ -13,6 +13,6 @@ public:
 
 	virtual void on_connect(unsigned int cid);
 	virtual void on_disconnect(unsigned int cid, const TCHAR * pReason);
-	virtual void on_message(unsigned int cid, const TAMENUT::SerializedPkt * Packet);
+	virtual void on_message(unsigned int cid, TAMENUT::SerializedPkt * pkt);
 
 };

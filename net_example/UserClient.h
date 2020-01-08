@@ -12,7 +12,7 @@ public:
 
 	virtual void on_connect();
 	virtual void on_disconnect(const TCHAR * pReason);
-	virtual void on_message(const TAMENUT::SerializedPkt * pkt);
+	virtual void on_message(TAMENUT::SerializedPkt * pkt);
 	
 };
 

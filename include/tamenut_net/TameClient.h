@@ -17,6 +17,6 @@ public:
 	DLL_FUNC void send(SerializedPkt * pkt);
 	DLL_FUNC virtual void on_connect() = 0;
 	DLL_FUNC virtual void on_disconnect(const TCHAR * pReason) = 0;
-	DLL_FUNC virtual void on_message(const SerializedPkt * pkt) = 0;
+	DLL_FUNC virtual void on_message(SerializedPkt * pkt) = 0;
 };
 }

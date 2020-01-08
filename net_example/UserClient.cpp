@@ -23,7 +23,21 @@ void UserClient::on_disconnect(const TCHAR * pReason)
 
 }
 
-void UserClient::on_message(const TAMENUT::SerializedPkt  * pkt)
+void UserClient::on_message(TAMENUT::SerializedPkt  * pkt)
 {
-//	INFO_LOG("", pkt._)
+	switch (pkt->get_pkt_id())
+	{
+	case 1:
+	{
+		ClientSendPkt *msg = (ClientSendPkt*)pkt;
+		INFO_LOG("1. client pkt - val:%d, (%s)\n", msg->_val, __FUNCTION__);
+		break;
+	}
+	case 2:
+	{
+		ServerSendPkt *msg = (ServerSendPkt*)pkt;
+		INFO_LOG("1. server pkt - val:%d, (%s)\n", msg->_val, __FUNCTION__);
+		break;
+	}
+	}
 }
