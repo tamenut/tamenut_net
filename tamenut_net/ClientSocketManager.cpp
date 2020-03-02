@@ -27,7 +27,7 @@ unsigned int ClientSocketManager::get_current_client_cnt()
 	return _current_client_cnt;
 }
 
-unsigned int ClientSocketManager::add_client_sock(SOCKET sock, struct sockaddr_in addr)
+int ClientSocketManager::add_client_sock(SOCKET sock, struct sockaddr_in addr)
 {
 	ClientSock client_sock;
 	client_sock._sock = sock;
@@ -35,13 +35,14 @@ unsigned int ClientSocketManager::add_client_sock(SOCKET sock, struct sockaddr_i
 	return add_client_sock(client_sock);
 }
 
-unsigned int ClientSocketManager::add_client_sock(ClientSock c_sock)
+int ClientSocketManager::add_client_sock(ClientSock c_sock)
 {
-	unsigned int client_id = 0;
+	int client_id = 0;
 	for (unsigned int i = 0; i < _client_sock_list.size(); i++) {
 		if (_client_sock_list[i]._sock == SOCKET_ERROR) {
 			_client_sock_list[i] = c_sock;
-			client_id = i + 1;
+			_client_sock_list[i]._client_id = i;
+			client_id = i;
 			_current_client_cnt++;
 			break;
 
@@ -49,12 +50,12 @@ unsigned int ClientSocketManager::add_client_sock(ClientSock c_sock)
 	}
 	return client_id;
 }
-ClientSock ClientSocketManager::get_client_sock(unsigned int client_id)
+ClientSock ClientSocketManager::get_client_sock(int client_id)
 {
 	ClientSock res;
-	unsigned int client_idx = client_id - 1;
+	int client_idx = client_id;
 
-	if (client_idx >= 0 && client_idx < _client_sock_list.size()) {
+	if (client_idx >= 0 && client_idx < (int)_client_sock_list.size()) {
 		res = _client_sock_list[client_idx];
 	}
 	else {
@@ -78,9 +79,9 @@ ClientSock ClientSocketManager::get_client_sock(fd_set sock_fd_set)
 bool ClientSocketManager::delete_client_sock(ClientSock c_sock)
 {
 	bool res = false;
-	unsigned int client_idx = c_sock._client_id - 1;
+	int client_idx = c_sock._client_id;
 	closesocket(c_sock._sock);
-	if (client_idx >= 0 && client_idx < _client_sock_list.size()) {
+	if (client_idx >= 0 && client_idx < (int)_client_sock_list.size()) {
 		_client_sock_list[client_idx].init();
 		_current_client_cnt--;
 		res = true;

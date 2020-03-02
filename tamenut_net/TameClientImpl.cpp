@@ -230,8 +230,8 @@ int TameClientImpl::post(char *payload, unsigned int payload_len)
 
 	if (connection() == true)
 	{
-		payload_len = hton_t(payload_len);
-		if ((sent_len = _post((char*)&payload_len, sizeof(payload_len))) == -1)
+		unsigned int ordered_payload_len = hton_t(payload_len);
+		if ((sent_len = _post((char*)&ordered_payload_len, sizeof(ordered_payload_len))) == -1)
 		{
 		}
 

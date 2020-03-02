@@ -95,6 +95,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>..\Debug\</AdditionalLibraryDirectories>
       <AdditionalDependencies>CommonUtild.lib;MultiFunctionLoggerd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <StackReserveSize>8000000</StackReserveSize>
+      <StackCommitSize>1000000</StackCommitSize>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -177,6 +179,7 @@
     <ClInclude Include="..\include\tamenut_net\SerializedPkt.h" />
     <ClInclude Include="..\include\tamenut_net\TameClient.h" />
     <ClInclude Include="..\include\tamenut_net\TameServer.h" />
+    <ClInclude Include="ProcPktThread.h" />
     <ClInclude Include="TameClientImpl.h" />
     <ClInclude Include="ClientSocketManager.h" />
     <ClInclude Include="SerializedPkt.h" />
@@ -187,6 +190,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ProcPktThread.cpp" />
     <ClCompile Include="TameClientImpl.cpp" />
     <ClCompile Include="ClientSocketManager.cpp" />
     <ClCompile Include="dllmain.cpp">

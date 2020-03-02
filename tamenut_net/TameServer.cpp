@@ -18,23 +18,9 @@ void TameServer::start()
 	_impl->start_server();
 }
 
-void TameServer::send(unsigned int cid, SerializedPkt * pkt)
+void TameServer::send(unsigned int client_id, SerializedPkt * pkt, size_t pkt_len)
 {
-	_impl->post(cid, (char*)&pkt, sizeof(pkt));
+	_impl->post(client_id, (char*)&pkt, pkt_len);
 }
 
-/*
-void TameServer::on_connect(unsigned int cid)
-{
-	INFO_LOG("- connect client (id:%u) \n", cid);
-}
-void TameServer::on_disconnect(unsigned int cid, const TCHAR* pReason)
-{
-	INFO_LOG("- disconnect\n");
-}
-void TameServer::on_message(unsigned int cid, const SerializedPkt& Packet)
-{
-	INFO_LOG("- message\n");
-}
-*/
 }

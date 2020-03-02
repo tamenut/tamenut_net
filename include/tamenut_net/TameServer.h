@@ -14,9 +14,9 @@ public:
 
 	DLL_FUNC void start();
 
-	DLL_FUNC void send(unsigned int cid, SerializedPkt * pkt);
-	DLL_FUNC virtual void on_connect(unsigned int cid) = 0;
-	DLL_FUNC virtual void on_disconnect(unsigned int cid, const TCHAR * pReason) = 0;
-	DLL_FUNC virtual void on_message(unsigned int cid, SerializedPkt *Packet) = 0;
+	DLL_FUNC void send(unsigned int client_id, SerializedPkt * pkt, size_t pkt_len);
+	DLL_FUNC virtual void on_connect(unsigned int client_id) = 0;
+	DLL_FUNC virtual void on_disconnect(unsigned int client_id, const TCHAR * pReason) = 0;
+	DLL_FUNC virtual void on_message(unsigned int client_id, SerializedPkt *Packet) = 0;
 };
 }

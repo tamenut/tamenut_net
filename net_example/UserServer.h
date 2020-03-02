@@ -11,8 +11,8 @@ public:
 	UserServer(unsigned short bind_port);
 	virtual ~UserServer();
 
-	virtual void on_connect(unsigned int cid);
-	virtual void on_disconnect(unsigned int cid, const TCHAR * pReason);
-	virtual void on_message(unsigned int cid, TAMENUT::SerializedPkt * pkt);
+	virtual void on_connect(unsigned int client_id);
+	virtual void on_disconnect(unsigned int client_id, const TCHAR * pReason);
+	virtual void on_message(unsigned int client_id, TAMENUT::SerializedPkt * pkt);
 
 };

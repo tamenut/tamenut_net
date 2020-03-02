@@ -14,6 +14,6 @@ SerializedPkt::~SerializedPkt()
 }
 unsigned int SerializedPkt::get_pkt_id()
 {
-	return _pkt_id;
+	return ntoh_t(_pkt_id);
 }
 }
